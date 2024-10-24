@@ -1,5 +1,11 @@
 import * as sdk from "@basaldev/blocks-backend-sdk";
 import { ServiceOpts, defaultChat, MessagingAppConfig, createNodeblocksMessagingApp } from "@basaldev/blocks-messaging-service";
+import { defaultAdapter, UserAppConfig, createNodeblocksUserApp } from "@basaldev/blocks-user-service";
+import * as handlers from  "./handlers/handlers";
+import * as validators from  "./validators/validators";
+import {config, database, up} from 'migrate-mongo';
+import { DATABASE_NAME } from "./constant";
+const path = require('path');
 
 /**
  * Access to the configs set on the NBC dashboard based no the adapter manifest(nbc.adapter.json) by process.env
@@ -115,6 +121,10 @@ type StartServiceArgs = Parameters<ReturnType<typeof createNodeblocksMessagingAp
  * @param {ServiceOpts} currentOptions Service options
  * @returns {StartServiceArgs} Updated service start args
  */
+
+
+//deploy - nodeblocks projects - mvp - add custom - chat service - add git repository string
+//todo: here include something
 export function beforeStartService(currentOptions: ServiceOpts): StartServiceArgs {
   /**
    * Add new api endpoints here
@@ -144,10 +154,46 @@ export function beforeStartService(currentOptions: ServiceOpts): StartServiceArg
    *   ]
    * };
    */
+  //get grades for current day
+  //get avg grades for current subject
+  //get feedback for grades
+          //into function context.query[]
+        //context.params
+        //install node js v18.something 
+        //after that npm -ci
+        //https://github.com/swbor/izumo_mvp1_chat_service/tree/HackIzumoTeam1-chat-init
+
   const updatedOptions = {
     ...currentOptions,
+    customRoutes: [
+      {
+        handler: handlers.get_asessments_for_day_handler,
+        method: 'get' as const,
+        path: '/asessments_day/get',
+        validators: [
+          validators.get.validate_date
+        ]
+      },
+      {
+        handler: handlers.get_avg_asessments_for_subject_handler,
+        method: 'get' as const,
+        path: '/asessments_for_subject/get',
+        validators: [
+          validators.get.validate_subject_id
+        ]
+      },
+      {
+        handler: handlers.get_feedback_for_asessments_handler,
+        method: 'get' as const,
+        path: '/asessments_for_grades/get',
+        validators: [
+          validators.get.validate_asessments
+        ]
+      },
+    ]
   };
   return [updatedOptions];
+  
 }
 
 /**
