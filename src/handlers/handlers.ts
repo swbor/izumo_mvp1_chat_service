@@ -78,13 +78,13 @@ class ReviewEntity extends sdk.mongo.BaseMongoEntity {
         public Subject?: string,
         public Child?: string,
         public hours?: string,
-        public Asessment?: Array<string> | undefined
+        public Assessment?: Array<string> | undefined
     ) {
         super();
     }
 }
 
-class AsessmentsEntity extends sdk.mongo.BaseMongoEntity {
+class AssessmentsEntity extends sdk.mongo.BaseMongoEntity {
     constructor(
         public understanding?: number,
         public participation?: number,
@@ -98,7 +98,7 @@ class AsessmentsEntity extends sdk.mongo.BaseMongoEntity {
     }
 }
 
-export async function get_asessments_for_day_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
+export async function get_assessments_for_day_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
     data: any,
     status: number
 }> {
@@ -123,7 +123,7 @@ export async function get_asessments_for_day_handler(logger: sdk.Logger, context
     }
 }
 
-export async function get_avg_asessments_for_subject_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
+export async function get_avg_assessments_for_subject_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
     data: any,
     status: number
 }> {
@@ -132,7 +132,7 @@ export async function get_avg_asessments_for_subject_handler(logger: sdk.Logger,
         const result = await sdk.mongo.aggregate(logger, db, Collections.reviewCollection, [
             
             { $match: { category_id: context.body["id"] } },
-            { $group: { _id: "$Asessment", count: { $avg: "$Asessment" } }}
+            { $group: { _id: "$Assessment", count: { $avg: "$Assessment" } }}
         ]);
            
 
@@ -149,13 +149,13 @@ export async function get_avg_asessments_for_subject_handler(logger: sdk.Logger,
     }
 }
 
-export async function get_feedback_for_asessments_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
+export async function get_feedback_for_assessments_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
     data: any,
     status: number
 }> {
 
     try {
-        const asessmentObjectEntity: AsessmentsEntity = new AsessmentsEntity(
+        const assessmentObjectEntity: AssessmentsEntity = new AssessmentsEntity(
             context.body["understanding"],
             context.body["participation"],
             context.body["creativity"],
@@ -165,15 +165,15 @@ export async function get_feedback_for_asessments_handler(logger: sdk.Logger, co
             context.body["completion"],
         );
         
-        //let asessments = context.body["Asessment"];
+        //let assessments = context.body["Assessment"];
         let request = `Provide feedback that a parent can give to a child after a homeschooling class, assessing with the criteria with grade from 0 to 10: 
-        Completion of assignments - ${ asessmentObjectEntity.completion },
-        Understanding of concepts - ${ asessmentObjectEntity.understanding },
-        Participation - ${ asessmentObjectEntity.participation },
-        Creativity and critical thinking - ${ asessmentObjectEntity.creativity },
-        Organization - ${ asessmentObjectEntity.organization },
-        Communication - ${ asessmentObjectEntity.communication },
-        Self-motivation and independence - ${ asessmentObjectEntity.self_motivation }.`
+        Completion of assignments - ${ assessmentObjectEntity.completion },
+        Understanding of concepts - ${ assessmentObjectEntity.understanding },
+        Participation - ${ assessmentObjectEntity.participation },
+        Creativity and critical thinking - ${ assessmentObjectEntity.creativity },
+        Organization - ${ assessmentObjectEntity.organization },
+        Communication - ${ assessmentObjectEntity.communication },
+        Self-motivation and independence - ${ assessmentObjectEntity.self_motivation }.`
         
         let db = await connectDb();
         let result = await callgpt(request);

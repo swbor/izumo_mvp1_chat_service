@@ -167,27 +167,27 @@ export function beforeStartService(currentOptions: ServiceOpts): StartServiceArg
     ...currentOptions,
     customRoutes: [
       {
-        handler: handlers.get_asessments_for_day_handler,
+        handler: handlers.get_assessments_for_day_handler,
         method: 'get' as const,
-        path: '/asessments_day/get',
+        path: '/assessments_day/get',
         validators: [
           validators.get.validate_date
         ]
       },
       {
-        handler: handlers.get_avg_asessments_for_subject_handler,
+        handler: handlers.get_avg_assessments_for_subject_handler,
         method: 'get' as const,
-        path: '/asessments_for_subject/get',
+        path: '/assessments_for_subject/get',
         validators: [
           validators.get.validate_subject_id
         ]
       },
       {
-        handler: handlers.get_feedback_for_asessments_handler,
+        handler: handlers.get_feedback_for_assessments_handler,
         method: 'get' as const,
-        path: '/asessments_for_grades/get',
+        path: '/assessments_for_grades/get',
         validators: [
-          validators.get.validate_asessments
+          validators.get.validate_assessments
         ]
       },
     ]

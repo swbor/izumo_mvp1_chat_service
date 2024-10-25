@@ -42,7 +42,7 @@ export namespace get {
         return 200;
     }
 
-    export async function validate_asessments(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext) {
+    export async function validate_assessments(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext) {
         if (!context.body["understanding"]) throw new sdk.NBError({
             code: 'invalid_get_request',
             httpCode: 400,
