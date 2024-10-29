@@ -39,7 +39,15 @@ export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adap
                 }
             }
         ]);
-        const res = await callgpt(getPrompt({subjects: subjects, reviews: reviews}));
+
+        const criteria = await sdk.mongo.aggregate(
+            logger,
+            db,
+            Collections.criteriaCollection,
+            []
+        );
+
+        const res = await callgpt(getPrompt({subjects: subjects, reviews: reviews, criteria: criteria}));
 
         return {
             data: res,

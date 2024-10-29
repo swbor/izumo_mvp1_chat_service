@@ -7,4 +7,5 @@ export namespace Collections {
     export const categoryCollection = 'category';
     export const subjectCollection = 'subjects';
     export const reviewCollection = 'review';
+    export const criteriaCollection = 'criteria';
 }
