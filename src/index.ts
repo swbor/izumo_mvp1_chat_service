@@ -1,10 +1,7 @@
 import * as sdk from "@basaldev/blocks-backend-sdk";
 import { ServiceOpts, defaultChat, MessagingAppConfig, createNodeblocksMessagingApp } from "@basaldev/blocks-messaging-service";
-import { defaultAdapter, UserAppConfig, createNodeblocksUserApp } from "@basaldev/blocks-user-service";
 import * as handlers from  "./handlers/handlers";
 import * as validators from  "./validators/validators";
-import {config, database, up} from 'migrate-mongo';
-import { DATABASE_NAME } from "./constant";
 const path = require('path');
 
 /**
