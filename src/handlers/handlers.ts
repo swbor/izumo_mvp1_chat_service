@@ -1,71 +1,8 @@
 import * as sdk from "@basaldev/blocks-backend-sdk";
-import { connectDb } from "../helpers";
+import { connectDb, getPrompt } from "../helpers";
 import { Collections } from "../constant";
 import { ObjectId } from 'mongodb';
-import OpenAI from 'openai';
-
-const client = new OpenAI({
-    apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
-});
-
-export const callgpt = async (request: string) => {
-
-    return await client.chat.completions
-        .create({
-            messages: [{ role: 'user', content: request }],
-            model: 'gpt-4o-2024-08-06',
-            response_format: {
-                type: 'json_schema',
-                json_schema: {
-                    name: 'main_output',
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            title: {
-                                description: 'feedback',
-                                type: 'string',
-                            },
-                            description: {
-                                description: 'feedback content',
-                                type: 'string',
-                            },
-                            rate: {
-                                description: 'price for the offer if was requested',
-                                type: 'number',
-                            },
-                        },
-                        required: ['description', 'rate', 'title'],
-                        additionalProperties: false,
-                    },
-                    strict: true,
-                },
-            },
-        })
-        ?.then(data => {
-            const parsed = JSON.parse(data.choices[0]?.message?.content || '') as {
-                description: string;
-                rate: string;
-                title: string;
-            };
-            return {
-                description: parsed?.description,
-                rate: String(parsed?.rate),
-                title: parsed?.title,
-            };
-        });
-};
-
-class ReviewEntity extends sdk.mongo.BaseMongoEntity {
-    constructor(
-        public date?: string,
-        public Subject?: string,
-        public Child?: string,
-        public hours?: string,
-        public Assessment?: Array<string> | undefined
-    ) {
-        super();
-    }
-}
+import { callgpt } from "../lib";
 
 class AssessmentsEntity extends sdk.mongo.BaseMongoEntity {
     constructor(
@@ -83,14 +20,16 @@ class AssessmentsEntity extends sdk.mongo.BaseMongoEntity {
 
 export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
     data: any,
+    message: string,
     status: number
 }> {
     try {
         let db = await connectDb();
         const currentDate = new Date();
-
+        const id: string = context.query['child_id'] as string;
         const reviews = await sdk.mongo.find(logger, db, Collections.reviewCollection,
             {
+                Child: new ObjectId(id),
                 $expr: {
                     $function: {
                         body: function (createdAt: Date) {
@@ -106,93 +45,105 @@ export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adap
                 }
             }
         );
-
         if (!reviews.length) {
             return {
-                data: {
-                    message: "No reviews for today"
-                },
+                data: undefined,
+                message: "No reviews for today",
                 status: 200
             };
         }
-
-        return {
-            data: reviews,
-            status: 200
-        };
-
-    } catch (e) {
-        console.error(e);
-        return {
-            data: false,
-            status: 500
-        };
-    }
-}
-
-export async function get_avg_assessments_for_subject_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
-    data: any,
-    status: number
-}> {
-    try {
-        let db = await connectDb();
-        const result = await sdk.mongo.aggregate(logger, db, Collections.reviewCollection, [
-
-            { $match: { category_id: context.body["id"] } },
-            { $group: { _id: "$Assessment", count: { $avg: "$Assessment" } } }
+        const subjects = await sdk.mongo.aggregate(logger, db, Collections.subjectCollection, [
+            {
+                $lookup:
+                {
+                    from: Collections.categoryCollection,
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'category'
+                }
+            }
         ]);
-
+        const res = await callgpt(getPrompt({subjects: subjects, reviews: reviews}));
 
         return {
-            data: result,
+            data: res,
+            message: "",
             status: 200
         };
+
     } catch (e) {
         console.error(e);
         return {
-            data: false,
+            data: undefined,
+            message: "",
             status: 500
         };
     }
 }
 
-export async function get_feedback_for_assessments_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
-    data: any,
-    status: number
-}> {
+// export async function get_avg_assessments_for_subject_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
+//     data: any,
+//     status: number
+// }> {
+//     try {
+//         let db = await connectDb();
+//         const result = await sdk.mongo.aggregate(logger, db, Collections.reviewCollection, [
 
-    try {
-        const assessmentObjectEntity: AssessmentsEntity = new AssessmentsEntity(
-            context.body["understanding"],
-            context.body["participation"],
-            context.body["creativity"],
-            context.body["organization"],
-            context.body["self-motivation"],
-            context.body["communication"],
-            context.body["completion"],
-        );
+//             { $match: { category_id: context.body["id"] } },
+//             { $group: { _id: "$Assessment", count: { $avg: "$Assessment" } } }
+//         ]);
 
-        //let assessments = context.body["Assessment"];
-        let request = `Provide feedback that a parent can give to a child after a homeschooling class, assessing with the criteria with grade from 0 to 10: 
-        Completion of assignments - ${assessmentObjectEntity.completion},
-        Understanding of concepts - ${assessmentObjectEntity.understanding},
-        Participation - ${assessmentObjectEntity.participation},
-        Creativity and critical thinking - ${assessmentObjectEntity.creativity},
-        Organization - ${assessmentObjectEntity.organization},
-        Communication - ${assessmentObjectEntity.communication},
-        Self-motivation and independence - ${assessmentObjectEntity.self_motivation}.`
 
-        let db = await connectDb();
-        let result = await callgpt(request);
-        return {
-            data: result,
-            status: 200
-        };
-    } catch (e) {
-        console.error(e);
-        return {
-            data: false,
-            status: 200
-        };
-    }
-}
+//         return {
+//             data: result,
+//             status: 200
+//         };
+//     } catch (e) {
+//         console.error(e);
+//         return {
+//             data: false,
+//             status: 500
+//         };
+//     }
+// }
+
+// export async function get_feedback_for_assessments_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
+//     data: any,
+//     status: number
+// }> {
+
+//     try {
+//         const assessmentObjectEntity: AssessmentsEntity = new AssessmentsEntity(
+//             context.body["understanding"],
+//             context.body["participation"],
+//             context.body["creativity"],
+//             context.body["organization"],
+//             context.body["self-motivation"],
+//             context.body["communication"],
+//             context.body["completion"],
+//         );
+
+//         //let assessments = context.body["Assessment"];
+//         let request = `Provide feedback that a parent can give to a child after a homeschooling class, assessing with the criteria with grade from 0 to 10: 
+//         Completion of assignments - ${assessmentObjectEntity.completion},
+//         Understanding of concepts - ${assessmentObjectEntity.understanding},
+//         Participation - ${assessmentObjectEntity.participation},
+//         Creativity and critical thinking - ${assessmentObjectEntity.creativity},
+//         Organization - ${assessmentObjectEntity.organization},
+//         Communication - ${assessmentObjectEntity.communication},
+//         Self-motivation and independence - ${assessmentObjectEntity.self_motivation}.`
+
+//         let db = await connectDb();
+//         let result = await callgpt(request);
+//         return {
+//             data: result,
+//             status: 200
+//         };
+//     } catch (e) {
+//         console.error(e);
+//         return {
+//             data: false,
+//             status: 200
+//         };
+//     }
+// }

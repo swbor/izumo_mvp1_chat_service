@@ -168,25 +168,25 @@ export function beforeStartService(currentOptions: ServiceOpts): StartServiceArg
         method: 'get' as const,
         path: '/feedback',
         validators: [
-          validators.get.validate_date
+          validators.get.validate_child_id
         ]
       },
-      {
-        handler: handlers.get_avg_assessments_for_subject_handler,
-        method: 'get' as const,
-        path: '/assessments_for_subject/get',
-        validators: [
-          validators.get.validate_subject_id
-        ]
-      },
-      {
-        handler: handlers.get_feedback_for_assessments_handler,
-        method: 'get' as const,
-        path: '/assessments_for_grades/get',
-        validators: [
-          validators.get.validate_assessments
-        ]
-      },
+      // {
+      //   handler: handlers.get_avg_assessments_for_subject_handler,
+      //   method: 'get' as const,
+      //   path: '/assessments_for_subject/get',
+      //   validators: [
+      //     validators.get.validate_subject_id
+      //   ]
+      // },
+      // {
+      //   handler: handlers.get_feedback_for_assessments_handler,
+      //   method: 'get' as const,
+      //   path: '/assessments_for_grades/get',
+      //   validators: [
+      //     validators.get.validate_assessments
+      //   ]
+      // },
     ]
   };
   return [updatedOptions];
