@@ -27,8 +27,8 @@ export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adap
         let db = await connectDb();
         const currentDate = new Date();
         const id: string = context.query['child_id'] as string;
-        const reviews = await sdk.mongo.find(logger, db, Collections.reviewCollection,
-            {
+        const reviews = await sdk.mongo.aggregate(logger, db, Collections.reviewCollection,
+            [{
                 Child: new ObjectId(id),
                 $expr: {
                     $function: {
@@ -43,7 +43,8 @@ export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adap
                         lang: "js"
                     }
                 }
-            }
+            }]
+           
         );
         if (!reviews.length) {
             return {
