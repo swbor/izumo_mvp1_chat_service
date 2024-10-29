@@ -7,7 +7,7 @@
       "displayName": "CHAT-GPT API KEY",
       "description": "CHAT-GPT API KEY for OpenAI",
       "type": "string",
-      "name": "OPENAI_API_KEY",
+      "name": "ADAPTER_OPENAI_API_KEY",
       "required": true,
       "defaultValue": ""
     }
