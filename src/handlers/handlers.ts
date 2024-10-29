@@ -4,20 +4,6 @@ import { Collections } from "../constant";
 import { ObjectId } from 'mongodb';
 import { callgpt } from "../lib";
 
-class AssessmentsEntity extends sdk.mongo.BaseMongoEntity {
-    constructor(
-        public understanding?: number,
-        public participation?: number,
-        public creativity?: number,
-        public organization?: number,
-        public self_motivation?: number,
-        public communication?: number,
-        public completion?: number
-    ) {
-        super();
-    }
-}
-
 export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
     data: any,
     message: string,
@@ -26,25 +12,14 @@ export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adap
     try {
         let db = await connectDb();
         const currentDate = new Date();
+        //start of the day
+        currentDate.setHours(0, 0, 0, 0);
         const id: string = context.query['child_id'] as string;
-        const reviews = await sdk.mongo.aggregate(logger, db, Collections.reviewCollection,
-            [{
+        const reviews = await sdk.mongo.find(logger, db, Collections.reviewCollection,
+            {
                 Child: new ObjectId(id),
-                $expr: {
-                    $function: {
-                        body: function (createdAt: Date) {
-                            return (
-                                createdAt.getDate() === currentDate.getDate() &&
-                                createdAt.getMonth() === currentDate.getMonth() &&
-                                createdAt.getFullYear() === currentDate.getFullYear()
-                            );
-                        },
-                        args: ["$createdAt"],
-                        lang: "js"
-                    }
-                }
-            }]
-           
+                createdAt: { $gte: new Date(currentDate) }
+            }
         );
         if (!reviews.length) {
             return {
