@@ -108,11 +108,14 @@ export async function get_assessments_for_day_handler(logger: sdk.Logger, contex
         };
 
         let db = await connectDb();
-        const result = await sdk.mongo.find(logger, db, Collections.reviewCollection, query);
-        return {
-            data: result,
-            status: 200
-        };
+        const review_id = (await sdk.mongo.find(logger, db, Collections.reviewCollection, query))["id"];
+        if (!review_id.length) {
+            return {
+                data: { code: "wrong_review_id",
+                        message: "Reviews don't have object with such id" },
+                status: 400
+            };        
+        }
         
     } catch (e) {
         console.error(e);
