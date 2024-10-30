@@ -67,7 +67,7 @@ export async function get_feedback_handler(logger: sdk.Logger, context: sdk.adap
     }
 }
 
-export async function get_task_suggestion_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
+export async function suggest_task_handler(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext): Promise<{
     data: any,
     message: string,
     status: number
@@ -95,6 +95,18 @@ export async function get_task_suggestion_handler(logger: sdk.Logger, context: s
         );
 
         const res = await gptGenerateTask(getTaskPrompt({child: children[0], subject: subjects[0]}));
+
+        await sdk.mongo.updateMany(
+            logger,
+            db,
+            Collections.taskCollection,
+            {
+                _id: new ObjectId(task_id)
+            },
+            {
+                $set: { description: res }
+            }
+        );
 
         return {
             data: res,

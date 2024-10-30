@@ -172,9 +172,9 @@ export function beforeStartService(currentOptions: ServiceOpts): StartServiceArg
         ]
       },
       {
-        handler: handlers.get_task_suggestion_handler,
-        method: 'get' as const,
-        path: '/task_suggestion',
+        handler: handlers.suggest_task_handler,
+        method: 'post' as const,
+        path: '/suggest_task',
         validators: [
           validators.post.validate_task_id
         ]
