@@ -88,11 +88,18 @@ export async function suggest_task_handler(logger: sdk.Logger, context: sdk.adap
             }
         );
 
-        const subjects = await sdk.mongo.find(logger, db, Collections.subjectCollection,
+        const subjects = await sdk.mongo.aggregate(logger, db, Collections.subjectCollection, [
             {
-                _id: new ObjectId(tasks[0].Subject)
+                _id: new ObjectId(tasks[0].Subject),
+                $lookup:
+                {
+                    from: Collections.categoryCollection,
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'category'
+                }
             }
-        );
+        ]);
 
         const res = await gptGenerateTask(getTaskPrompt({child: children[0], subject: subjects[0]}));
 
