@@ -90,7 +90,9 @@ export async function suggest_task_handler(logger: sdk.Logger, context: sdk.adap
 
         const subjects = await sdk.mongo.aggregate(logger, db, Collections.subjectCollection, [
             {
-                _id: new ObjectId(tasks[0].Subject),
+                $match: {
+                    _id: { $eq: new ObjectId(tasks[0].Subject) }
+                },
                 $lookup:
                 {
                     from: Collections.categoryCollection,
