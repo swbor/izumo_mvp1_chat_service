@@ -104,7 +104,7 @@ export async function suggest_task_handler(logger: sdk.Logger, context: sdk.adap
                 _id: new ObjectId(task_id)
             },
             {
-                $set: { description: res }
+                $set: { description: res['tasks'] }
             }
         );
 
