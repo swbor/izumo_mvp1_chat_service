@@ -32,8 +32,8 @@ export const getTaskPrompt = ( {child, subject}:{child: any, subject: any} ) => 
     const childString = JSON.stringify(child);
     const subjectString = JSON.stringify(subject);
 
-
-    const prompt = `JSON: Generate task suggestion on subject: ${subjectString} for a child: ${childString}.
+    console.log("getTaskPrompt:", childString, subjectString);
+    const prompt = `JSON: Generate task suggestion on subject: ${subjectString} (do not use description field to for task ideas) for a child: ${childString}.
     Provide 3 possible tasks on the subject in a marker list in the following way: 
     <ol><li> <short task name></li> 
       <ul> <li><strong> Task:</strong> task with detailed description </li>

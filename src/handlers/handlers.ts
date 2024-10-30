@@ -82,13 +82,13 @@ export async function suggest_task_handler(logger: sdk.Logger, context: sdk.adap
             }
         );
 
-        const children = await sdk.mongo.find(logger, db, Collections.taskCollection,
+        const children = await sdk.mongo.find(logger, db, Collections.childrenCollection,
             {
                 _id: new ObjectId(tasks[0].Child)
             }
         );
 
-        const subjects = await sdk.mongo.find(logger, db, Collections.taskCollection,
+        const subjects = await sdk.mongo.find(logger, db, Collections.subjectCollection,
             {
                 _id: new ObjectId(tasks[0].Subject)
             }
