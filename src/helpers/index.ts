@@ -35,8 +35,8 @@ export const getTaskPrompt = ( {child, subject}:{child: any, subject: any} ) => 
     const prompt = `JSON: Generate task suggestion on subject: ${subjectString} (do not use subject description to generate task idea) for a child: ${childString}.
     Provide 3 possible tasks on the subject in a marker list in the following way: 
     <ol><li> <short task name></li> 
-      <ul> <li><strong> Task </strong></li>: task with detailed description
-      <li><strong> Objective</strong></li>: objective
+      <ul> <li><strong> Task:</strong> task with detailed description </li>
+      <li><strong> Objective:</strong> objective </li>
       </ul>   
     </ol>
     Format answer so as to paste it to react dangerouslySetInnerHTML.`
