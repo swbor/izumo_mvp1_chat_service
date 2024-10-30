@@ -75,7 +75,7 @@ export async function suggest_task_handler(logger: sdk.Logger, context: sdk.adap
     try {
         let db = await connectDb();
 
-        const task_id: string = context.query['task_id'] as string;
+        const task_id: string = context.body['task_id'] as string;
         const tasks: TaskEntity[] = await sdk.mongo.find(logger, db, Collections.taskCollection,
             {
                 _id: new ObjectId(task_id)

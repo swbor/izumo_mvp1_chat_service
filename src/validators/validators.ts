@@ -106,7 +106,7 @@ export namespace post {
 
         let db = await connectDb();
 
-        const task_id: string = context.query['task_id'] as string;
+        const task_id: string = context.body['task_id'] as string;
         const tasks = await sdk.mongo.find(logger, db, Collections.taskCollection,
             {
                 _id: new ObjectId(task_id)
