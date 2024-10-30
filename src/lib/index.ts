@@ -4,7 +4,7 @@ const client = new OpenAI({
     apiKey: process.env['ADAPTER_CUSTOM_OPENAI_API_KEY'],
 });
 
-export const callgpt = async (prompt: string) => {
+export const gptGenerateFeedback = async (prompt: string) => {
     return await client.chat.completions
         .create({
             messages: [{ role: 'user', content: prompt }],
@@ -46,6 +46,40 @@ export const callgpt = async (prompt: string) => {
                 advices: parsed?.advices,
                 weaknesses: parsed?.weaknesses,
                 feedback: parsed?.feedback,
+            };
+        });
+};
+
+export const gptGenerateTask = async (prompt: string) => {
+    return await client.chat.completions
+        .create({
+            messages: [{ role: 'user', content: prompt }],
+            model: 'gpt-4o-2024-08-06',
+            response_format: {
+                type: 'json_schema',
+                json_schema: {
+                    name: 'main_output',
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            tasks: {
+                                description: 'Task suggestions on the specified subject for the child',
+                                type: 'string',
+                            },
+                        },
+                        required: ['tasks'],
+                        additionalProperties: false,
+                    },
+                    strict: true,
+                },
+            },
+        })
+        ?.then(data => {
+            const parsed = JSON.parse(data.choices[0]?.message?.content || '') as {
+                tasks: string;
+            };
+            return {
+                tasks: parsed?.tasks
             };
         });
 };

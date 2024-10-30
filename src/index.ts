@@ -171,6 +171,14 @@ export function beforeStartService(currentOptions: ServiceOpts): StartServiceArg
           validators.get.validate_child_id
         ]
       },
+      {
+        handler: handlers.get_task_suggestion_handler,
+        method: 'get' as const,
+        path: '/task_suggestion',
+        validators: [
+          validators.post.validate_task_id
+        ]
+      },
       // {
       //   handler: handlers.get_avg_assessments_for_subject_handler,
       //   method: 'get' as const,

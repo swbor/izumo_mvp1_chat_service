@@ -1,4 +1,7 @@
 import * as sdk from "@basaldev/blocks-backend-sdk";
+import { ObjectId } from 'mongodb';
+import { Collections } from "../constant";
+import { connectDb } from "../helpers";
 
 export namespace get {
     export async function validate_parent_id(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext) {
@@ -91,6 +94,32 @@ export namespace post {
             message: 'parent_id is required',
         });
 
+        return 200;
+    }
+
+    export async function validate_task_id(logger: sdk.Logger, context: sdk.adapter.AdapterHandlerContext) {
+        if (!context.body["task_id"]) throw new sdk.NBError({
+            code: 'invalid_post_request',
+            httpCode: 400,
+            message: 'task_id is required',
+        });
+
+        let db = await connectDb();
+
+        const task_id: string = context.query['task_id'] as string;
+        const tasks = await sdk.mongo.find(logger, db, Collections.taskCollection,
+            {
+                _id: new ObjectId(task_id)
+            }
+        );
+
+        if (!tasks.length)
+            throw new sdk.NBError({
+                code: 'wrong_task_id',
+                httpCode: 400,
+                message: 'No task with such task_id'
+            });
+        
         return 200;
     }
 

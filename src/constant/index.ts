@@ -8,4 +8,5 @@ export namespace Collections {
     export const subjectCollection = 'subjects';
     export const reviewCollection = 'review';
     export const criteriaCollection = 'criteria';
+    export const taskCollection = 'tasks';
 }

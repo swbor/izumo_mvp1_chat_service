@@ -10,7 +10,7 @@ export async function connectDb(): Promise<sdk.mongo.Db> {
   return globalThis.db;
 }
 
-export const getPrompt = ({subjects, reviews, criteria}:{subjects: any[], reviews: any[], criteria: any[]}) => {
+export const getFeedbackPrompt = ({subjects, reviews, criteria}:{subjects: any[], reviews: any[], criteria: any[]}) => {
   try {
     const subjectsString = JSON.stringify(subjects);
     const reviewString = JSON.stringify(reviews);
@@ -20,6 +20,20 @@ export const getPrompt = ({subjects, reviews, criteria}:{subjects: any[], review
       Here is criteria that is used for assessment: ${criteriaString}. Here is a list of reviews for todays lessons with grades for provided criteria: ${reviewString}. 
       Subjects that referenced in reviews: ${subjectsString}). Provide positive reinforcement, areas to improve and advice on improvement.
     `
+    return prompt;
+  } catch (error) {
+    return ''
+  }
+
+}
+
+export const getTaskPrompt = ( {child, subject}:{child: any, subject: any} ) => {
+  try {
+    const childString = JSON.stringify(child);
+    const subjectString = JSON.stringify(subject);
+
+    const prompt = `JSON: Generate task suggestion on subject: ${subjectString} (do not use subject description to generate task idea) for a child: ${childString}.
+    Provide 3 possible tasks on the subject in a marked list specifying task and objective`
     return prompt;
   } catch (error) {
     return ''
