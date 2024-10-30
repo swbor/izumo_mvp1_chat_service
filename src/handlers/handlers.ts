@@ -93,13 +93,6 @@ export async function suggest_task_handler(logger: sdk.Logger, context: sdk.adap
                 $match: {
                     _id: { $eq: new ObjectId(tasks[0].Subject) }
                 },
-                $lookup:
-                {
-                    from: Collections.categoryCollection,
-                    localField: 'category',
-                    foreignField: '_id',
-                    as: 'category'
-                }
             }
         ]);
 
